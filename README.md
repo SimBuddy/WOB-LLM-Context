@@ -4,7 +4,7 @@
 **WOB is an experimental methodology**. Its goal is to provide a means of refactoring source code for data intensive applications, and increase their effectiveness.
 
 
-**EXPERIMENT 1** - In the experiment below, WOB is being applied to a range of varying data processing algorithms
+**EXPERIMENT 2** - In the experiment below, WOB is being applied to a range of varying data processing algorithms
 
 Collectively, these algorithms represent very different ways computers spend effort to solve difficult problems: searching large spaces, retrieving information, estimating uncertain quantities, solving mathematical systems, integrating functions, reasoning through game trees, and deciding whether logical constraints can be satisfied. They were useful as a broad test set because each exposes a different kind of computational workload—search depth, samples, iterations, precision, function evaluations, graph exploration, model calls, or branch processing—making them a strong cross-section for testing whether work can be allocated more selectively without sacrificing the required result.
 ## Algorithms and systems tested
