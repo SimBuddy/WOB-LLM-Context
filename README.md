@@ -264,3 +264,136 @@ Sometimes it identifies a better fixed or established algorithm.
 Sometimes it shows that the native algorithm already allocates work effectively.
 
 And sometimes the correct result is to make no change at all.
+
+**Details of amended Jacobi-PCG algorithm - unchanged since 1952.**
+
+The solver loop stayed almost identical. The meaningful change was the introduction of a Jacobi preconditioner using the inverse of the matrix diagonal.
+Plain CG path
+
+In the original CG logic, the residual itself is used directly:
+
+z = r.copy()
+rho = float(np.dot(r, z))
+
+Since z == r, that is ordinary CG.
+
+The search direction then evolves as:
+
+p = z.copy() if it == 1 else z + (rho / rho_prev) * p
+
+and the standard CG update follows:
+
+q = A @ p
+alpha = rho / float(np.dot(p, q))
+
+x += alpha * p
+r -= alpha * q
+Jacobi-PCG amendment
+
+The amendment was essentially this initialization:
+
+invdiag = 1 / A.diagonal()
+
+and then, on every iteration, instead of:
+
+z = r.copy()
+
+you use:
+
+z = invdiag * r
+
+So the actual implementation in the experiment was:
+
+invdiag = 1 / A.diagonal() if jacobi else None
+
+for it in range(1, maxiter + 1):
+
+    z = invdiag * r if jacobi else r.copy()
+
+    rho = float(np.dot(r, z))
+
+    p = z.copy() if it == 1 else z + (rho / rho_prev) * p
+
+    q = A @ p
+
+    alpha = rho / float(np.dot(p, q))
+
+    x += alpha * p
+    r -= alpha * q
+
+    rho_prev = rho
+
+That is essentially the whole algorithmic amendment.
+
+What the amendment means mathematically
+
+Plain CG effectively works directly with:
+
+Ax=b
+
+Jacobi-PCG uses the matrix diagonal as a cheap approximation to the matrix itself:
+
+M=diag(A)
+
+and applies:
+
+M
+−1
+r
+
+to the residual before constructing the next search direction.
+
+So instead of treating every coordinate of the residual equally, the correction is scaled according to the local diagonal magnitude of the matrix.
+
+Conceptually:
+
+CG:
+residual
+   ↓
+search direction
+
+PCG:
+residual
+   ↓
+cheap diagonal scaling
+   ↓
+better-conditioned search direction
+Why it was economically attractive
+
+The extra per-iteration work was just approximately:
+
+invdiag * r
+
+—a vector multiply.
+
+Meanwhile each iteration already contains the much more substantial sparse matrix-vector multiplication:
+
+q = A @ p
+
+So the preconditioner was cheap relative to the native iteration.
+
+And it reduced the number of iterations by:
+
+22.4% at the 1e-3 solution-error target
+24.7% at the 1e-6 target
+
+while measured per-iteration timing was essentially unchanged:
+
+CG: about 15.72 μs/iteration
+Jacobi-PCG: about 15.71 μs/iteration
+
+So the change was tiny in code but substantial in total workload.
+
+The particularly WOB-like discovery
+
+The obvious temptation would have been to build an additional adaptive WOB stopping mechanism.
+
+But the experiment found that the better amendment was simply:
+
+ADD ONE CHEAP PRECONDITIONING STEP
+→ REMOVE ~22–25% OF WHOLE ITERATIONS
+→ KEEP STANDARD RESIDUAL STOPPING
+
+That is a very clean example of WOB the container.
+
+Rather than trying to optimize the stopping decision itself, the experiment discovered that changing the quality of each iteration removed more workload than making the stopping controller more sophisticated.
