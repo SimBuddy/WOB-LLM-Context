@@ -394,6 +394,6 @@ ADD ONE CHEAP PRECONDITIONING STEP
 → REMOVE ~22–25% OF WHOLE ITERATIONS
 → KEEP STANDARD RESIDUAL STOPPING
 
-That is a very clean example of WOB the container.
+That is a very clean example of WOB + Nitpicker technique together discovering additional optimisations.
 
 Rather than trying to optimize the stopping decision itself, the experiment discovered that changing the quality of each iteration removed more workload than making the stopping controller more sophisticated.
