@@ -1,7 +1,7 @@
 # WOB LLM Context
 
 
-**WOB is an experimental methodology**. Its goal is to provide a means of refactoring source code for data intensive applications, and increase their effectiveness.
+**WOB is an experimental methodology**. Its goal is to provide a novel means of refactoring source code for data intensive applications, and increase their effectiveness.
 
 **WOB Compared with Conventional Refactoring**
 Traditional refactoring improves code structure and maintainability.
